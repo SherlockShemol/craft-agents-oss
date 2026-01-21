@@ -33,6 +33,8 @@ export interface AuthState {
     apiKey: string | null;
     /** Claude Max OAuth token (if using oauth_token auth type) */
     claudeOAuthToken: string | null;
+    /** OpenRouter API key (if using openrouter auth type) */
+    openRouterApiKey: string | null;
   };
 
   /** Workspace/MCP configuration */
@@ -133,6 +135,7 @@ export async function getAuthState(): Promise<AuthState> {
   const craftToken = await manager.getCraftOAuth();
   const apiKey = await manager.getApiKey();
   const claudeOAuth = await getValidClaudeOAuthToken();
+  const openRouterApiKey = await manager.getOpenRouterApiKey();
   const activeWorkspace = getActiveWorkspace();
 
   // Determine if billing credentials are satisfied based on auth type
@@ -141,6 +144,8 @@ export async function getAuthState(): Promise<AuthState> {
     hasCredentials = !!apiKey;
   } else if (config?.authType === 'oauth_token') {
     hasCredentials = !!claudeOAuth;
+  } else if (config?.authType === 'openrouter') {
+    hasCredentials = !!openRouterApiKey;
   }
 
   return {
@@ -153,6 +158,7 @@ export async function getAuthState(): Promise<AuthState> {
       hasCredentials,
       apiKey,
       claudeOAuthToken: claudeOAuth,
+      openRouterApiKey,
     },
     workspace: {
       hasWorkspace: !!activeWorkspace,
